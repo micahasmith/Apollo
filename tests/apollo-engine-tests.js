@@ -1,11 +1,13 @@
 var vows = require('vows'),
  	eyes = require('eyes'),
     assert = require('assert'),
-	data = require('../apollo-data.js'),
+	data = require('../apollo-data.js').Apollo.Data,
 	command = require('../apollo-command.js').Apollo.Command,
 	commandHandler = require('../apollo-command.js').Apollo.CommandHandler
 	engineFactory = require('../apollo-engine.js').Apollo.Engine,
 	engine = engineFactory(data,command,commandHandler);
+
+var testc = new command.factory("pv",["arg1","arg2"],"http://localhost:80/page1");
 
 
 var mockReq={
@@ -43,6 +45,10 @@ var mockReq={
 			url:"urlname"
 		}
 	}
+};
+
+var mockRes={
+	cookie:function(a,b){var i=0;}
 };
 
 // Create a Test Suite
@@ -96,9 +102,14 @@ vows.describe('apollo engine').addBatch({
 			assert.equal(commands.command,"name");
 			assert.equal(commands.source,"hostnameurlname");
 		}
-	},"setRequestUserId":{
+	},"setData func":{
 		topic:function(){
-			//engine.setRequestUserId
+			//this.callback(null);
+			//console.log(this);
+			engine.setData(null,mockRes,testc,1,this.callback); 
+		},
+		'will call the callback': function(err,another) {
+			assert.isNull(err);
 		}
-	}   
+	}
 }).run();

@@ -11,9 +11,15 @@ Apollo.Engine=function(data,command,commandHandler) {
 				
 				v.waterfall(
 					function(fn) {
-						getData(null,req,res);
-					});
-				callback();
+						getData(null,req,res,fn);
+					},
+					function(fn,userid,com){
+						console.log("v2w",arguments);
+						setData(null,res,com,userid,fn);
+					},
+					callback
+				);
+				
 			},
 			//get the userid, creating a new one if possible
 			//get the command passed
@@ -33,9 +39,22 @@ Apollo.Engine=function(data,command,commandHandler) {
 			},
 			//set the response userid
 			//persist command data
-			setData:function(err,req,res,userid,callback) {
+			setData:function(err,res,command,userid,callback) {
 				var f1=this.setRequestUserId,
-					f2=this.handleCommand;
+					f2=data.handleCommand;
+
+				v.parallel(
+					function(cb){
+						f1(null,userid,res,cb);
+					},
+					function(cb){
+						//console.log(data);
+						data.handleCommand({command:command,userid:userid},cb);
+					},
+					function(e){
+						callback(e);
+					}
+				);
 			},
 			getRequestUserId:function(err,req,res,callback) {
 				if(err) return console.log(err);
@@ -54,7 +73,7 @@ Apollo.Engine=function(data,command,commandHandler) {
 			},
 			setRequestUserId:function(err,userid,res,callback) {
 				res.cookie('apolloid',userid);
-				callback();
+				callback(null);
 			},
 			getRequestCommands:function(err,req,callback) {
 				//console.log("getRequestCommands",arguments,req.get('za'));

@@ -1,4 +1,5 @@
 var	events = require('events'),
+	u = require('underscore'),
 	Apollo = Apollo || {};
 
 Apollo.Command=(function(){
